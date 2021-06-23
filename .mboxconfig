@@ -1,0 +1,8 @@
+{
+  "podfile": "Native/Podfile.rb",
+  "podspec": "Native/MBoxRuby.podspec",
+  "xcodeproj": "Native/MBoxRuby.xcodeproj",
+  "gem": {
+    "gemspec": "Ruby/mbox-ruby.gemspec"
+  }
+}

@@ -1,0 +1,6 @@
+
+Bundler:
+  required: true
+  platforms:
+    - iOS
+    - Ruby

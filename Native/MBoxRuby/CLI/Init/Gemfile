@@ -1,0 +1,118 @@
+
+# 本文件由 MBox 生成并更新，请勿修改本文件。
+# 如需安装自己的 Gem，请在相同目录下创建 Gemfile.custom 文件，本 Gemfile 将自动加载它
+
+WORKSPACE_DIR = File.dirname(__FILE__)
+MBOX_DIR = File.join(WORKSPACE_DIR, '.mbox')
+GEMFILE_DIR = WORKSPACE_DIR
+RUBYGEMS_DIR = File.join MBOX_DIR, 'RubyGems'
+GEM_PATHS = Dir["#{RUBYGEMS_DIR}/*"]
+LOCAL_GEMS = {}
+
+GEM_PATHS.each do |path|
+  LOCAL_GEMS[File.basename(path)] = path unless Dir[File.join(path, '*.gemspec')].empty?
+end
+
+module ::Bundler
+
+  if !defined?(MBOX_GEM_DEFINED)
+    MBOX_GEM_DEFINED = true
+    class Dsl
+      alias :hook_gem :gem
+      def gem(name, *args)
+        exists = dependencies.find { |dp| dp.name == name }
+        if path = LOCAL_GEMS[name]
+          return if exists
+          args = [{:path => path}]
+        else
+          if exists
+            return if args.nil? || args.empty?
+            dependencies.delete(exists)
+
+            options = args.last.is_a?(Hash) ? args.pop.dup : {}
+            if options[:path] || options[:git]
+              args = [options]
+            else
+              unless options[:type] == :development
+                version = args || [">= 0"]
+                requirements = Gem::Dependency.new(name, version).merge(exists).requirement.requirements
+                equal_dp = requirements.select { |dp| dp[0] == '=' }.sort_by { |dp| dp[1] }
+                if equal_dp.count > 1
+                  requirements.delete_if do |dp|
+                    dp[0] == '=' && dp != equal_dp.last
+                  end
+                end
+                args = requirements.map { |dp| dp.join(" ") }
+              end
+              args << options unless options.empty?
+            end
+          end
+        end
+        hook_gem(name, *args)
+      end
+    end
+    class Source
+      class Rubygems
+        alias :hook_credless_remotes :credless_remotes
+        def credless_remotes
+          remotes.map(&:host)
+        end
+        alias :hook_add_remote :add_remote
+        def add_remote(source)
+          hook_add_remote(source)
+          @remotes.uniq!(&:host)
+        end
+      end
+    end
+
+    class Definition
+      alias :mbox_source_requirements :source_requirements
+      def source_requirements
+        r = mbox_source_requirements
+        LOCAL_GEMS.each do |name, path|
+          r[name] = Source::Path.new("path" => path)
+        end
+        r
+      end
+    end
+  end
+end
+
+LOCAL_GEMS.each do |_, path|
+  @sources.add_path_source("path" => path)
+end
+
+group_path = "#{MBOX_DIR}/GemfileRepos"
+
+GemfileRepos = File.exists?(group_path) ? Dir["#{group_path}/*"] : []
+unless GemfileRepos.empty?
+  # 加载 Repo 下的 Gemfile
+  GemfileRepos.each do |path|
+    gemfile = File.join File.realpath(path), 'Gemfile'
+    if File.exists?(gemfile)
+      eval_gemfile gemfile
+    end
+  end
+else
+  # 加载 Workspace 下的 Gemfile
+  Dir["#{WORKSPACE_DIR}/*/"].each do |repo|
+    gemfile = "#{repo}Gemfile"
+    if File.exists?(gemfile) && File.exists?("#{repo}.mboxconfig")
+      eval_gemfile gemfile
+    end
+  end
+end
+
+group :plugins2 do
+  Dir["#{RUBYGEMS_DIR}/*/*.gemfile"].each do |gemfile|
+    if File.exists?(gemfile)
+      eval_gemfile gemfile
+    end
+  end
+end
+
+# 加载用户定义环境
+gemfile = "#{WORKSPACE_DIR}/Gemfile.custom"
+if File.exists?(gemfile)
+  eval_gemfile gemfile
+end
