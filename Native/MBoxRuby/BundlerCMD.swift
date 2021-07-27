@@ -138,7 +138,10 @@ open class BundlerCMD: GemCMD {
             if let userLockPath = userLockPath {
                 let lockPath = workingDirectory.appending(pathComponent: "Gemfile.lock")
                 try UI.log(verbose: "Copy \(Workspace.relativePath(userLockPath)) -> \(Workspace.relativePath(lockPath))") {
-                    _ = try FileManager.default.replaceItemAt(URL(fileURLWithPath: lockPath), withItemAt: URL(fileURLWithPath: userLockPath))
+                    if lockPath.isExists {
+                        try FileManager.default.removeItem(atPath: lockPath)
+                    }
+                    try FileManager.default.copyItem(atPath: userLockPath, toPath: lockPath)
                 }
                 return true
             } else {

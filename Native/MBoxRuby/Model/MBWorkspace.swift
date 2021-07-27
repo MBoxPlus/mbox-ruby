@@ -45,7 +45,7 @@ extension MBWorkspace {
         // Link .mbox/Gemfile
         paths["Gemfile"] = self.relativePath(self.gemfilePath)
 
-        for plugin in UI.activedPlugins {
+        for plugin in MBPluginManager.shared.packages {
             guard let rubyDir = plugin.rubyDir else { continue }
             let name = rubyDir.subFiles.first(where: { $0.pathExtension == "gemspec" })?.fileName ?? plugin.name
             paths[rubyGemsDir.appending(pathComponent: name)] = rubyDir
@@ -67,7 +67,7 @@ extension MBWorkspace {
         }
 
         // Link Container Gemfile
-        let currentContainerRepos = self.config.currentFeature.activatedContainerRepos.compactMap(\.workRepository)
+        let currentContainerRepos = self.config.currentFeature.activatedContainerRepos(for: .Gem).compactMap(\.workRepository)
         guard currentContainerRepos.count > 0 else {
             return paths
         }

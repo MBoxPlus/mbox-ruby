@@ -23,6 +23,11 @@ extension MBCommander {
             return cmd
         }
 
+        open override func validate() throws {
+            try super.validate()
+            try self.validateMultipleContainers(for: .Gem)
+        }
+
         dynamic
         open override func setupCMD() throws -> (MBCMD, [String]) {
             if self.shouldSetupBundler {

@@ -22,7 +22,12 @@ module MBox
       end
 
       def path
-        @path || working_path
+        return working_path if working_path.exist?
+        if @path != nil
+          @path = Pathname.new(@path)
+          return @path if @path.exist?
+        end
+        nil
       end
 
       def exist?

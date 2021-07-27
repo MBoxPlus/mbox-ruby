@@ -12,6 +12,16 @@ import MBoxContainer
 import MBoxDependencyManager
 
 extension MBWorkRepo {
+
+    @_dynamicReplacement(for: fetchContainers())
+    open func ruby_fetchContainers() -> [MBContainer] {
+        var value = self.fetchContainers()
+        if self.path.appending(pathComponent: "Gemfile").isExists {
+            value.append(MBContainer(name: self.name, tool: .Gem))
+        }
+        return value
+    }
+
     public func allGemspecPaths() -> [String] {
         var baseNames = [String]()
         if let gemspec = self.setting.gem?.gemspec {
