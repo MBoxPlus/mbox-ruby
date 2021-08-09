@@ -17,7 +17,7 @@ extension MBWorkRepo {
     open func ruby_fetchContainers() -> [MBContainer] {
         var value = self.fetchContainers()
         if self.path.appending(pathComponent: "Gemfile").isExists {
-            value.append(MBContainer(name: self.name, tool: .Gem))
+            value.append(MBContainer(name: self.name, tool: .Bundler))
         }
         return value
     }
@@ -44,7 +44,7 @@ extension MBWorkRepo {
         var names = self.resolveDependencyNames()
         let data = self.allGemspecPaths().map {
             (
-                tool: MBDependencyTool.Gem,
+                tool: MBDependencyTool.Bundler,
                 name: $0.lastPathComponent.fileName
             )
         }

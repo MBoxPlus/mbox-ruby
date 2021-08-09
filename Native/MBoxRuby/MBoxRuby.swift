@@ -10,6 +10,7 @@ import Cocoa
 import MBoxCore
 import MBoxWorkspaceCore
 import MBoxWorkspace
+import MBoxDependencyManager
 
 @objc(MBoxRuby)
 open class MBoxRuby: NSObject, MBWorkspacePluginProtocol {
@@ -21,6 +22,21 @@ open class MBoxRuby: NSObject, MBWorkspacePluginProtocol {
 
     public func enablePlugin(workspace: MBWorkspace, from version: String?) throws {
         try workspace.setupRubyEnv()
+        // Change Gem to Bundler
+        var changed = false
+        for container in workspace.config.currentFeature.currentContainers where container.tool == "Gem" {
+            container.tool = .Bundler
+            changed = true
+        }
+        for repo in workspace.config.currentFeature.repos {
+            for component in repo.components where component.tool == "Gem" {
+                component.tool = .Bundler
+                changed = true
+            }
+        }
+        if changed {
+            workspace.config.save()
+        }
     }
 
     public func disablePlugin(workspace: MBWorkspace) throws {

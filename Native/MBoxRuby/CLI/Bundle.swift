@@ -25,7 +25,7 @@ extension MBCommander {
 
         open override func validate() throws {
             try super.validate()
-            try self.validateMultipleContainers(for: .Gem)
+            try self.validateMultipleContainers(for: .Bundler)
         }
 
         dynamic

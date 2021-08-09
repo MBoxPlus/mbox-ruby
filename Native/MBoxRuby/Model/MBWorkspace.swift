@@ -60,14 +60,14 @@ extension MBWorkspace {
             for path in gemspecPaths {
                 gemspecs[path.lastPathComponent.fileName] = path
             }
-            for name in repo.activatedComponents(for: .Gem) {
+            for name in repo.activatedComponents(for: .Bundler) {
                 guard let path = gemspecs[name] else { continue }
                 paths[rubyGemsDir.appending(pathComponent: name)] = path.deletingLastPathComponent
             }
         }
 
         // Link Container Gemfile
-        let currentContainerRepos = self.config.currentFeature.activatedContainerRepos(for: .Gem).compactMap(\.workRepository)
+        let currentContainerRepos = self.config.currentFeature.activatedContainerRepos(for: .Bundler).compactMap(\.workRepository)
         guard currentContainerRepos.count > 0 else {
             return paths
         }
