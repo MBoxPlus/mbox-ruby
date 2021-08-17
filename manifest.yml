@@ -1,18 +1,18 @@
 ---
-NAME: MBoxRuby
 ALIAS: 
-VERSION: '1.1'
+AUTHORS:
+- MBox Team
+CLI: true
 DEPENDENCIES:
 - MBoxCore
 - MBoxWorkspace
 - MBoxContainer
 - MBoxDependencyManager
-CLI: true
-LAUNCHER: true
 GROUPS:
 - Ruby
+LAUNCHER: true
+MINIMUM_VERSION: 4.8.0
+NAME: MBoxRuby
 RUBY: true
 USER_VISIBLE: false
-MINIMUM_VERSION: '4.8.0'
-AUTHORS:
-- MBox Team
+VERSION: '1.1'

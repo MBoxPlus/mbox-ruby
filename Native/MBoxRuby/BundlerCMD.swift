@@ -21,9 +21,21 @@ open class BundlerCMD: GemCMD {
         }
     }
 
+    open lazy var gemfilePath: String? = {
+        if let path = self.workingDirectory?.appending(pathComponent: "Gemfile"),
+           path.isExists {
+            return path
+        }
+        let path = workspace.rootPath.appending(pathComponent: "Gemfile")
+        if path.isExists {
+            return path
+        }
+        return nil
+    }()
+
     open override func setupEnvironment(_ base: [String: String]? = nil) -> [String: String] {
         var env = super.setupEnvironment(BundlerCMD.environment)
-        env["BUNDLE_GEMFILE"] = self.workingDirectory?.appending(pathComponent: "Gemfile")
+        env["BUNDLE_GEMFILE"] = self.gemfilePath
         return env
     }
 
@@ -77,6 +89,7 @@ open class BundlerCMD: GemCMD {
             UI.log(verbose: "Gemfile.lock not exists.")
             return nil
         }
+        UI.log(verbose: "Parse `\(lockPath)`")
         let regex = try! NSRegularExpression(pattern: "BUNDLED WITH\\n +(.*?) *\\n", options: .caseInsensitive)
         guard let match = regex.firstMatch(in: lock, options: [], range: NSMakeRange(0, lock.count)) else {
             UI.log(verbose: "Gemfile.lock parse failed!")
