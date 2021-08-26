@@ -2,7 +2,7 @@
 //  MBSetting.swift
 //  MBoxRuby
 //
-//  Created by 詹迟晶 on 2020/8/21.
+//  Created by Whirlwind on 2020/8/21.
 //  Copyright © 2020 com.bytedance. All rights reserved.
 //
 

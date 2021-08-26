@@ -1,6 +1,8 @@
 
-# 本文件由 MBox 生成并更新，请勿修改本文件。
-# 如需安装自己的 Gem，请在相同目录下创建 Gemfile.custom 文件，本 Gemfile 将自动加载它
+# This document is generated and updated by MBox.
+# Please do not modify this document!
+#
+# To install your own gem, please create a `Gemfile.custom` file in the same directory, then we will automatically load it.
 
 WORKSPACE_DIR = File.dirname(__FILE__)
 MBOX_DIR = File.join(WORKSPACE_DIR, '.mbox')
@@ -86,7 +88,7 @@ group_path = "#{MBOX_DIR}/GemfileRepos"
 
 GemfileRepos = File.exists?(group_path) ? Dir["#{group_path}/*"] : []
 unless GemfileRepos.empty?
-  # 加载 Repo 下的 Gemfile
+  # Load Repository Gemfile
   GemfileRepos.each do |path|
     gemfile = File.join File.realpath(path), 'Gemfile'
     if File.exists?(gemfile)
@@ -94,7 +96,7 @@ unless GemfileRepos.empty?
     end
   end
 else
-  # 加载 Workspace 下的 Gemfile
+  # Load Workspace Gemfile
   Dir["#{WORKSPACE_DIR}/*/"].each do |repo|
     gemfile = "#{repo}Gemfile"
     if File.exists?(gemfile) && File.exists?("#{repo}.mboxconfig")
@@ -111,7 +113,7 @@ group :plugins2 do
   end
 end
 
-# 加载用户定义环境
+# Load User Custom Gemfile
 gemfile = "#{WORKSPACE_DIR}/Gemfile.custom"
 if File.exists?(gemfile)
   eval_gemfile gemfile

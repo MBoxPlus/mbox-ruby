@@ -2,7 +2,7 @@
 //  MBWorkspace.swift
 //  MBoxRuby
 //
-//  Created by 詹迟晶 on 2020/6/24.
+//  Created by Whirlwind on 2020/6/24.
 //  Copyright © 2020 com.bytedance. All rights reserved.
 //
 

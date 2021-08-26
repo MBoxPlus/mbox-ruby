@@ -6,7 +6,7 @@ require "mbox/version"
 Gem::Specification.new do |spec|
   spec.name          = "mbox"
   spec.version       = MBox::VERSION
-  spec.authors       = ["詹迟晶"]
+  spec.authors       = ["WhirlwindJames"]
   spec.email         = ["james.zhan@bytedance.com"]
 
   spec.summary       = %q{mbox command line tool.}

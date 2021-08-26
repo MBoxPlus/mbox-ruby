@@ -6,13 +6,6 @@ module MBox
         class Feature
             BRANCH_PREFIX = 'feature/'
             attr_accessor :branch_prefix
-            def branch_prefix
-                if @branch_prefix.nil?
-                    # 旧代码采用 mbox 前缀
-                    @branch_prefix = 'mbox/'
-                end
-                @branch_prefix
-            end
 
             def branch_prefix=(prefix)
                 @branch_prefix = prefix
