@@ -17,6 +17,13 @@ extension MBCommander {
             return "Redirect to Bundler with MBox environment"
         }
 
+        open override class var example: String? {
+            return """
+# Install gems with bundler
+$ mbox bundle install
+"""
+        }
+
         open override var cmd: MBCMD {
             let cmd = BundlerCMD()
             cmd.showOutput = true
