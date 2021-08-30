@@ -1,5 +1,7 @@
 # MBox Ruby
 
+Language: [简体中文](./README.zh-cn.md)
+
 ## Contributing
 Please reference the section [Contributing](https://github.com/MBoxPlus/mbox#contributing)
 
