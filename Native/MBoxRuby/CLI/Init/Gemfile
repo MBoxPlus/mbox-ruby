@@ -54,6 +54,15 @@ module ::Bundler
       end
     end
     class Source
+      class Path
+        def relative_path(path = self.path)
+          root_path = Bundler.default_gemfile.dirname
+          if path.to_s.start_with?(root_path.to_s)
+            return path.relative_path_from(root_path)
+          end
+          path
+        end
+      end
       class Rubygems
         alias :hook_credless_remotes :credless_remotes
         def credless_remotes
@@ -117,4 +126,11 @@ end
 gemfile = "#{WORKSPACE_DIR}/Gemfile.custom"
 if File.exists?(gemfile)
   eval_gemfile gemfile
+end
+
+if @sources.respond_to?(:implicit_global_source?)
+  if @sources.implicit_global_source?
+    # Add global default source
+    source "https://rubygems.org"
+  end
 end

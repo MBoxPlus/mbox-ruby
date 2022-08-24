@@ -8,20 +8,28 @@
 
 import Foundation
 import MBoxCore
-import MBoxWorkspaceCore
 
 extension MBSetting {
-    public class Gem: MBCodableObject {
+    public class Bundler: MBCodableObject {
+        @Codable
+        public var gemfile: String?
+
+        @Codable
+        public var gemfiles: [String: String]?
+
         @Codable
         public var gemspec: String?
+
+        @Codable
+        public var gemspecs: [String]?
     }
 
-    public var gem: Gem? {
+    public var bundler: Bundler? {
         set {
-            self.setValue(newValue, forPath: "gem")
+            self.setValue(newValue, forPath: "bundler")
         }
         get {
-            return self.value(forPath: "gem")
+            return self.value(forPath: "bundler")
         }
     }
 }

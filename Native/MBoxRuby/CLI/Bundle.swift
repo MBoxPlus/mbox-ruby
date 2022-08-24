@@ -8,7 +8,6 @@
 
 import Foundation
 import MBoxCore
-import MBoxWorkspaceCore
 import MBoxContainer
 
 extension MBCommander {
@@ -39,6 +38,8 @@ $ mbox bundle install
         open override func setupCMD() throws -> (MBCMD, [String]) {
             if self.shouldSetupBundler {
                 try BundlerCMD.setup(workingDirectory: self.workspace.rootPath)
+            } else if let workspace = MBProcess.shared.workspace {
+                try BundlerCMD.install(workingDirectory: workspace.rootPath)
             }
             return try super.setupCMD()
         }

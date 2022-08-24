@@ -68,19 +68,31 @@ $ mbox plugin enable ruby
 ### 主项目/Container 接入
 
 1. 在主项目根目录下有 `Gemfile` 则自动识别为 Bundler 容器
+1. 如果 `Gemfile` 文件不在项目根目录，需要在项目根目录下 `.mboxconfig` 配置文件中新增配置：
 
-### 组件/Pod 接入
+```json
+{
+   "ruby": {
+      "gemfile": "xxx/Gemfile"
+   }
+}
+```
+
+### 组件/Gem 接入
 
 1. 该插件会自动搜索项目根目录下的 `*.gemspec` 文件
-1. 如果 `podspec` 文件不在根目录，需要在项目根目录下 `.mboxconfig` 配置文件中新增配置：
+1. 如果 `gemspec` 文件不在根目录，需要在项目根目录下 `.mboxconfig` 配置文件中新增配置：
 
-```
+```json
 {
-    "gem": {
-        # 只有一个 gemspec 文件
-        "gemspec": "xx/yy.podspec"
+    "ruby": {
+        // 只有一个 gemspec 文件
+        "gemspec": "xx/yy.gemspec",
 
-        # 当存在多个 gemspec 文件，可以使用以下形式
+        // 使用通配符配置所有 gemspec
+        "gemspec": "xx/*.gemspec",
+
+        // 当存在多个 gemspec 文件，可以使用以下形式
         "gemspecs": [
             "xx/yy1.gemspec",
             "xx/yy2.gemspec"
@@ -88,6 +100,8 @@ $ mbox plugin enable ruby
     }
 }
 ```
+
+如果项目既是 Container 又是 Gem，则需要同时设置上述配置。
 
 ## Contributing
 Please reference the section [Contributing](https://github.com/MBoxPlus/mbox#contributing)

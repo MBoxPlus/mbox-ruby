@@ -8,7 +8,6 @@
 
 import Foundation
 import MBoxCore
-import MBoxWorkspaceCore
 
 extension MBCommander {
     open class Gem: Exec {

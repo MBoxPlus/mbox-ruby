@@ -21,17 +21,14 @@ Pod::Spec.new do |spec|
 
   spec.platform     = :osx, '10.15'
   spec.source_files = "#{name}/*.{h,m,swift}", "#{name}/**/*.{h,m,swift}"
-  spec.default_subspec = 'Default'
 
-  spec.subspec 'Default' do |ss|
-    ss.source_files = "#{name}/*.{h,m,swift}", "#{name}/**/*.{h,m,swift}"
+  spec.source_files = "#{name}/*.{h,m,swift}", "#{name}/**/*.{h,m,swift}"
 
-    yaml['DEPENDENCIES']&.each do |name|
-      ss.dependency name
-    end
-    yaml['FORWARD_DEPENDENCIES']&.each do |name, _|
-      ss.dependency name
-    end
+  yaml['DEPENDENCIES']&.each do |name|
+    spec.dependency name
+  end
+  yaml['FORWARD_DEPENDENCIES']&.each do |name, _|
+    spec.dependency name
   end
 #  spec.dependency "RubyGateway"
 end

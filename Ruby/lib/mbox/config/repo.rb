@@ -146,9 +146,55 @@ module MBox
         end
       end
 
-      def setting_for_key(key)
+      def setting_for_key(key, allow_no_prefix: true)
         return nil if settings.nil?
-        settings[key]
+        keypath = key.split('.')
+        v = settings.dig(*keypath)
+        return v if v
+        if !allow_no_prefix || keypath.length <= 1
+          return nil
+        end
+        keypath.shift
+        settings.dig(*keypath)
+      end
+
+      def path_for_setting(config, defaults: [])
+        return nil unless working_path.exist?
+        filenames = []
+        if filename = setting_for_key(config)
+          filenames << filename
+        end
+        filenames.concat(defaults)
+        Dir.chdir(working_path) do
+          filenames.each do |file|
+            if file = Dir[file].first
+              return working_path.join(file)
+            end
+          end
+        end
+        nil
+      end
+
+      def paths_for_setting(plural, singular: nil, defaults: [])
+        return [] unless working_path.exist?
+        filenames = []
+        if filename = setting_for_key(plural)
+          filename = [filename] unless filename.is_a?(Array)
+          filenames.concat(filename)
+        end
+        if filenames.blank? && !singular.nil?
+          if filename = setting_for_key(singular)
+            filenames << filename
+          end
+        end
+        Dir.chdir(working_path) do
+          filenames = filenames.flat_map { |file| Dir[file] }
+          if filenames.blank?
+            filenames = defaults.flat_map { |file| Dir[file] }
+          end
+          return filenames.map { |file| working_path.join(file) }
+        end
+        []
       end
     end
   end

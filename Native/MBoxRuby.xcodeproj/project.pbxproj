@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -17,6 +17,7 @@
 		AB6D760D23047C7B003A0EA1 /* MBoxRuby.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6D760C23047C7A003A0EA1 /* MBoxRuby.swift */; };
 		AB8EEF9D22DF5A1900DBF94D /* MBoxRuby.h in Headers */ = {isa = PBXBuildFile; fileRef = AB8EEF9B22DF5A1900DBF94D /* MBoxRuby.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AB98D50324A2FD0700C786E7 /* MBWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB98D50224A2FD0700C786E7 /* MBWorkspace.swift */; };
+		ABD5F26426EB4925006DF0DD /* MBPluginModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD5F26326EB4925006DF0DD /* MBPluginModule.swift */; };
 		ABF4D92D232A76FE00BB40F2 /* GemCMD.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF4D92C232A76FD00BB40F2 /* GemCMD.swift */; };
 		ABF519C622E1A70900421916 /* BundlerCMD.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF519C522E1A70900421916 /* BundlerCMD.swift */; };
 /* End PBXBuildFile section */
@@ -40,6 +41,7 @@
 		AB98D50224A2FD0700C786E7 /* MBWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBWorkspace.swift; sourceTree = "<group>"; };
 		ABA08CE2238D88E500C5567A /* manifest.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; name = manifest.yml; path = ../manifest.yml; sourceTree = "<group>"; };
 		ABA08CEE238D8B9100C5567A /* Basic.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Basic.xcconfig; sourceTree = "<group>"; };
+		ABD5F26326EB4925006DF0DD /* MBPluginModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBPluginModule.swift; sourceTree = "<group>"; };
 		ABF4D92C232A76FD00BB40F2 /* GemCMD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemCMD.swift; sourceTree = "<group>"; };
 		ABF519C522E1A70900421916 /* BundlerCMD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundlerCMD.swift; sourceTree = "<group>"; };
 		BC644860542773CCDB5EB730 /* Pods-MBoxRuby.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MBoxRuby.release.xcconfig"; path = "Target Support Files/Pods-MBoxRuby/Pods-MBoxRuby.release.xcconfig"; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 				AB66AE6824EFBDF400CE7F8C /* MBSetting.swift */,
 				AB31BBBF264D217D00B91986 /* MBWorkRepo.swift */,
 				AB31BBCE264D22E100B91986 /* MBDependencyTool.swift */,
+				ABD5F26326EB4925006DF0DD /* MBPluginModule.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -165,8 +168,6 @@
 				AB8EEF9422DF5A1900DBF94D /* Sources */,
 				AB8EEF9522DF5A1900DBF94D /* Frameworks */,
 				AB8EEF9622DF5A1900DBF94D /* Resources */,
-
-				AB719511231FBB090079935A /* Fix Ruby LD PATH */,
 			);
 			buildRules = (
 			);
@@ -183,7 +184,7 @@
 		AB8EEF8F22DF5A1900DBF94D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1300;
+				LastUpgradeCheck = 1400;
 				ORGANIZATIONNAME = com.bytedance;
 				TargetAttributes = {
 					AB8EEF9722DF5A1900DBF94D = {
@@ -193,7 +194,7 @@
 				};
 			};
 			buildConfigurationList = AB8EEF9222DF5A1900DBF94D /* Build configuration list for PBXProject "MBoxRuby" */;
-			compatibilityVersion = "Xcode 12.0";
+			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -244,26 +245,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AB719511231FBB090079935A /* Fix Ruby LD PATH */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 8;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
-			);
-			name = "Fix Ruby LD PATH";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-			shellPath = /bin/sh;
-			shellScript = "#\"${SRCROOT}/MBoxRuby/change_ruby_path.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -271,6 +252,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABD5F26426EB4925006DF0DD /* MBPluginModule.swift in Sources */,
 				AB6D760D23047C7B003A0EA1 /* MBoxRuby.swift in Sources */,
 				AB98D50324A2FD0700C786E7 /* MBWorkspace.swift in Sources */,
 				ABF4D92D232A76FE00BB40F2 /* GemCMD.swift in Sources */,
@@ -323,6 +305,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DYLIB_CURRENT_VERSION = "$(MARKETING_VERSION)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -390,6 +373,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_CURRENT_VERSION = "$(MARKETING_VERSION)";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -422,6 +406,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -452,6 +437,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;

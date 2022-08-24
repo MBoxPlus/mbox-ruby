@@ -40,6 +40,10 @@ module MBox
                 @repos ||= []
             end
 
+            def find_repo(name)
+                repos.find { |repo| repo.name.downcase == name.downcase }
+            end
+
             include JSONable
             def json_class
                 {

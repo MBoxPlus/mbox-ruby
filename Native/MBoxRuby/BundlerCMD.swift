@@ -8,25 +8,23 @@
 
 import Foundation
 import MBoxCore
-import MBoxWorkspaceCore
 import MBoxContainer
 
 open class BundlerCMD: GemCMD {
     public required init(useTTY: Bool? = nil) {
         super.init(useTTY: useTTY)
+        self.bin = "bundle"
         if let version = Self.version {
-            self.bin = "bundle _\(version)_"
-        } else {
-            self.bin = "bundle"
+            self.args.append("_\(version)_")
         }
     }
 
     open lazy var gemfilePath: String? = {
-        if let path = self.workingDirectory?.appending(pathComponent: "Gemfile"),
-           path.isExists {
+        var path = self.workingDirectory.appending(pathComponent: "Gemfile")
+        if path.isExists {
             return path
         }
-        let path = workspace.rootPath.appending(pathComponent: "Gemfile")
+        path = workspace.rootPath.appending(pathComponent: "Gemfile")
         if path.isExists {
             return path
         }
@@ -53,11 +51,13 @@ open class BundlerCMD: GemCMD {
     }
 
     public static func check(version: String? = nil) -> String? {
-        let cmd = GemCMD()
+        let cmd = GemCMD(useTTY: false)
         let versions = cmd.versions(gem: "bundler")
         if versions.isEmpty { return nil }
         guard let version = version else {
-            return versions.first!
+            return versions.sorted(by: {
+                $0.compare($1, options: .numeric) == .orderedDescending
+            }).first!
         }
         if versions.contains(version) {
             return version
@@ -65,17 +65,25 @@ open class BundlerCMD: GemCMD {
         return nil
     }
 
-    public static func isSystemRuby() -> Bool {
-        let cmd = MBCMD()
-        if !cmd.exec("command which ruby") {
+    public static func gemdirIsWritable() -> Bool {
+        let cmd = MBCMD(useTTY: false)
+        if !cmd.exec("ruby -e 'puts Gem.dir;puts Gem.bindir'") {
+            UI.log(verbose: "Could not get gem installation directory.")
             return false
         }
-        return cmd.outputString.hasPrefix("/usr/bin/")
+        let info: [Substring] = cmd.outputString.split(separator: "\n")
+        let gemdir = String(info[0]) + "/"
+        let bindir = String(info[1]) + "/"
+        let gemDirIsWritable = FileManager.default.isWritableFile(atPath: gemdir)
+        UI.log(verbose: "gemdir \(gemDirIsWritable ? "is" : "is NOT") writable: `\(gemdir)`")
+        let binDirIsWritable = FileManager.default.isWritableFile(atPath: bindir)
+        UI.log(verbose: "bindir \(binDirIsWritable ? "is" : "is NOT") writable: `\(bindir)`")
+        return gemDirIsWritable && binDirIsWritable
     }
 
     public static func install(version: String? = nil) -> Bool {
         var args = ["--no-document"]
-        if self.isSystemRuby() {
+        if !self.gemdirIsWritable() {
             args.append("--user-install")
         }
 
@@ -96,25 +104,36 @@ open class BundlerCMD: GemCMD {
             return nil
         }
         let version = String(lock[match.range(at: 1)])
-        UI.log(verbose: "Require bundler \(version)")
+        UI.log(verbose: "Require bundler `\(version)` from the \(lockPath.lastPathComponent)")
         return version
     }
+
+    private static let minVersion = "2.2.8"
 
     private static func checkBundlerVersion(workingDirectory: String) -> (String?, Bool) {
         return UI.log(verbose: "Check Bundler Version") {
             let lockPath = workingDirectory.appending(pathComponent: "Gemfile.lock")
-            let requiredVersion = bundlerVersion(lockPath: lockPath)
+            var requiredVersion = bundlerVersion(lockPath: lockPath)
+            if let version = requiredVersion,
+                version.compare(self.minVersion, options: .numeric) == .orderedAscending {
+                UI.log(verbose: "The required version `\(version)` is too low. Instead, use the min bundler version `\(self.minVersion)`.")
+                requiredVersion = nil
+                UI.log(verbose: "Remove expired Gemfile.lock")
+                try? FileManager.default.removeItem(atPath: lockPath)
+            }
             let installedVersion = check(version: requiredVersion)
-            if let installedVersion = installedVersion {
+            if let installedVersion = installedVersion,
+               installedVersion.compare(self.minVersion, options: .numeric) != .orderedAscending {
                 return (installedVersion, true)
             }
-            UI.log(verbose: "Should install bundler `\(requiredVersion ?? "Any")`.")
-            return (requiredVersion, false)
+            UI.log(verbose: "Should install bundler `\(requiredVersion ?? self.minVersion)`.")
+            return (requiredVersion ?? self.minVersion, false)
         }
     }
 
     private static func checkBundlerGems(workingDirectory: String) -> Bool {
         return UI.log(verbose: "Check Bundler Gems") {
+            guard self.executableExists("bundle") else { return false }
             let bundler = BundlerCMD()
             return bundler.check()
         }
@@ -138,18 +157,17 @@ open class BundlerCMD: GemCMD {
     }
 
     @discardableResult
-    private static func setupLockfile(workingDirectory: String) throws -> Bool {
+    public static func setupLockfile(workingDirectory: String) throws -> Bool {
         return try UI.log(verbose: "Setup Gemfile.lock") {
             var userLockPath: String? = nil
-            for repo in Workspace.config.currentFeature.activatedContainerRepos {
-                let path = repo.workingPath.appending(pathComponent: "Gemfile.lock")
-                if path.isExists {
+            for container in Workspace.config.currentFeature.activatedContainers(for: .Bundler) {
+                if let path = container.lockAbsolutePath {
                     userLockPath = path
                     break
                 }
             }
+            let lockPath = workingDirectory.appending(pathComponent: "Gemfile.lock")
             if let userLockPath = userLockPath {
-                let lockPath = workingDirectory.appending(pathComponent: "Gemfile.lock")
                 try UI.log(verbose: "Copy \(Workspace.relativePath(userLockPath)) -> \(Workspace.relativePath(lockPath))") {
                     if lockPath.isExists {
                         try FileManager.default.removeItem(atPath: lockPath)
@@ -158,21 +176,33 @@ open class BundlerCMD: GemCMD {
                 }
                 return true
             } else {
+                try? FileManager.default.removeItem(atPath: lockPath)
                 UI.log(verbose: "No valid Gemfile.lock to copy.")
                 return false
             }
         }
     }
 
-    public static func setup(workingDirectory: String, forceUpdate: Bool = false) throws {
+    public static func install(workingDirectory: String) throws {
         let lockPath = workingDirectory.appending(pathComponent: "Gemfile.lock")
         if !lockPath.isExists {
             try self.setupLockfile(workingDirectory: workingDirectory)
         }
-
         try self.setupBundler(workingDirectory: workingDirectory)
+    }
+
+    public static var ready = false
+
+    public static func setup(workingDirectory: String, forceUpdate: Bool = false) throws {
+        if ready {
+            UI.log(verbose: "Bundler environment is ready. Skip setup.")
+            return
+        }
+
+        try install(workingDirectory: workingDirectory)
 
         if self.checkBundlerGems(workingDirectory: workingDirectory) {
+            ready = true
             return
         }
 
@@ -180,6 +210,7 @@ open class BundlerCMD: GemCMD {
             // retry setup the Bundler, due to the Gemfile.lock changed
             try self.setupBundler(workingDirectory: workingDirectory)
             if self.checkBundlerGems(workingDirectory: workingDirectory) {
+                ready = true
                 return
             }
         }
@@ -190,5 +221,7 @@ open class BundlerCMD: GemCMD {
                 throw RuntimeError("Setup Gems Error")
             }
         }
+
+        ready = true
     }
 }

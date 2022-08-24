@@ -8,20 +8,23 @@
 
 import Foundation
 import MBoxCore
-import MBoxWorkspaceCore
 import MBoxContainer
 
 extension MBWorkspace {
 
-    open var gemfilePath: String {
+    public var gemfilePath: String {
         return self.configDir.appending(pathComponent: "Gemfile")
     }
 
-    open var rubyGemsDir: String {
+    public var rubyGemsDir: String {
         return self.configDir.appending(pathComponent: "RubyGems")
     }
 
-    open func setupRubyEnv() throws {
+    public var gemfilesDir: String {
+        return self.configDir.appending(pathComponent: "GemfileRepos")
+    }
+
+    public func setupRubyEnv() throws {
         try UI.log(verbose: "Add Gemfile into workspace") {
             guard let path = MBoxRuby.bundle.path(forResource: "Gemfile", ofType: nil) else {
                 return
@@ -45,56 +48,37 @@ extension MBWorkspace {
         // Link .mbox/Gemfile
         paths["Gemfile"] = self.relativePath(self.gemfilePath)
 
-        for plugin in MBPluginManager.shared.packages {
-            guard let rubyDir = plugin.rubyDir else { continue }
-            let name = rubyDir.subFiles.first(where: { $0.pathExtension == "gemspec" })?.fileName ?? plugin.name
+        for module in MBPluginManager.shared.modules {
+            guard let rubyDir = module.rubyDir else { continue }
+            let name = rubyDir.subFiles.first(where: { $0.pathExtension == "gemspec" })?.fileName ?? module.name
             paths[rubyGemsDir.appending(pathComponent: name)] = rubyDir
         }
 
         // Link Ruby Gems
-        for repo in self.repos {
-            guard let gemspecPaths = repo.workRepository?.allGemspecPaths() else {
-                continue
-            }
-            var gemspecs = [String: String]()
-            for path in gemspecPaths {
-                gemspecs[path.lastPathComponent.fileName] = path
-            }
-            for name in repo.activatedComponents(for: .Bundler) {
-                guard let path = gemspecs[name] else { continue }
-                paths[rubyGemsDir.appending(pathComponent: name)] = path.deletingLastPathComponent
+        for repo in self.workRepos {
+            for component in repo.activatedComponents(for: .Bundler) {
+                let symbolDir = rubyGemsDir.appending(pathComponent: component.name)
+                paths[symbolDir] = component.path.relativePath(from: symbolDir.deletingLastPathComponent)
             }
         }
 
         // Link Container Gemfile
-        let currentContainerRepos = self.config.currentFeature.activatedContainerRepos(for: .Bundler).compactMap(\.workRepository)
-        guard currentContainerRepos.count > 0 else {
-            return paths
-        }
-
-        let gemfileRepoGroup = self.configDir.appending(pathComponent: "GemfileRepos")
-        for repo in currentContainerRepos {
-            let gemfilePath = repo.path.appending(pathComponent: "Gemfile")
-            if !gemfilePath.isExists {
-                continue
-            }
-
-            let gemfileRepo = gemfileRepoGroup.appending(pathComponent: repo.name)
-            let relativePath = repo.path.relativePath(from: gemfileRepo.deletingLastPathComponent)
-            paths[self.relativePath(gemfileRepo)] = relativePath
+        for container in self.config.currentFeature.activatedContainers(for: .Bundler) {
+            let symbolDir = gemfilesDir.appending(pathComponent: container.name)
+            paths[symbolDir] = container.path.relativePath(from: symbolDir.deletingLastPathComponent)
         }
 
         return paths
     }
 
-    open func updateRubyEnv() throws {
+    public func updateRubyEnv() throws {
         try? BundlerCMD.setup(workingDirectory: self.rootPath, forceUpdate: true)
     }
 
-    open func teardownRubyEnv() throws {
+    public func teardownRubyEnv() throws {
     }
 
-    open func teardownRepoRubyEnv() throws {
+    public func teardownRepoRubyEnv() throws {
         let gemfileRepo = self.configDir.appending(pathComponent: "GemfileRepos")
         if gemfileRepo.isExists {
             UI.log(verbose: "Remove `.mbox/GemfileRepos`") {

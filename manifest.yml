@@ -1,13 +1,14 @@
 ---
-ALIAS: 
 AUTHORS:
 - MBox Team
 CLI: true
 DEPENDENCIES:
 - MBoxCore
-- MBoxWorkspace
 - MBoxContainer
 - MBoxDependencyManager
+- MBoxWorkspace/Core
+FORWARD_DEPENDENCIES:
+  MBoxWorkspace: 
 GROUPS:
 - Ruby
 LAUNCHER: true
@@ -16,3 +17,5 @@ NAME: MBoxRuby
 RUBY: true
 USER_VISIBLE: false
 VERSION: '1.1'
+LAUNCHERS:
+- MBoxRuby/Bundler

@@ -3,6 +3,10 @@
 require 'mbox/config/config.rb'
 require 'mbox/config/repo.rb'
 require 'mbox/config/feature.rb'
+require 'active_support'
+if ActiveSupport.version >= Gem::Version.new("6.0")
+  require 'active_support/multibyte/unicode'
+end
 
 module MBox
   class Config
@@ -99,6 +103,16 @@ module MBox
       @verbose && !silent
     end
 
+    private
+
+    def normalize(path)
+      if ActiveSupport.version >= Gem::Version.new("6.0")
+        path.unicode_normalize(:nfkc)
+      else
+        ActiveSupport::Multibyte::Unicode.normalize(path)
+      end
+    end
+
     public
 
     #-------------------------------------------------------------------------#
@@ -111,12 +125,12 @@ module MBox
     def installation_root
       unless @installation_root
         unless ENV["MBOX_ROOT"].blank?
-          current_dir = ActiveSupport::Multibyte::Unicode.normalize(ENV["MBOX_ROOT"])
+          current_dir = normalize(ENV["MBOX_ROOT"])
           current_path = Pathname.new(current_dir)
           set_installation_root(current_path)
         end
         unless @installation_root
-          current_dir = ActiveSupport::Multibyte::Unicode.normalize(Dir.pwd)
+          current_dir = normalize(Dir.pwd)
           current_path = Pathname.new(current_dir)
           until current_path.root?
             break if set_installation_root(current_path)
