@@ -11,3 +11,7 @@ if [[ $bundle_gems_path == "" ]]; then
 fi
 
 mbox_exe bundle config --global global_path_appends_ruby_scope true
+
+if [[ "$(uname -m)" == "arm64" ]]; then
+    mbox_exe bundle config --global build.ffi --enable-libffi-alloc
+fi

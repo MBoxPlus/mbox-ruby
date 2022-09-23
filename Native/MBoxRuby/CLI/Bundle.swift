@@ -9,9 +9,10 @@
 import Foundation
 import MBoxCore
 import MBoxContainer
+import MBoxDependencyManager
 
 extension MBCommander {
-    open class Bundle: Exec {
+    open class Bundle: DependencyManager {
         open class override var description: String? {
             return "Redirect to Bundler with MBox environment"
         }
